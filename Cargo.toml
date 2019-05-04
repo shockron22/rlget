@@ -1,0 +1,9 @@
+[package]
+name = "rget"
+version = "0.1.0"
+authors = ["jake@mccoy.engineer"]
+
+[dependencies]
+reqwest = "0.9.3"
+docopt = "1.1.0"
+serde = "1.0.91"
