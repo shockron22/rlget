@@ -1,6 +1,6 @@
 [package]
-name = "rget"
-version = "0.1.0"
+name = "rlget"
+version = "0.0.1"
 authors = ["jake@mccoy.engineer"]
 
 [dependencies]

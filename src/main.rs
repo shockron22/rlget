@@ -7,11 +7,11 @@ use serde::Deserialize;
 mod download;
 
 const USAGE: &'static str = "
-RPget
+RLget
 
 Usage:
-  rpget [options] <url>
-  rpget (-h | --help)
+  rlget [options] <url>
+  rlget (-h | --help)
 
 Options:
     -t THREADS, --threads=THREADS     Number of download threads. (default: 1)

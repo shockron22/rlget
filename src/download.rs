@@ -3,8 +3,8 @@ extern crate indicatif;
 
 use self::indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 
-use download::reqwest::header::RANGE;
-
+use self::reqwest::header;
+use self::reqwest::Client;
 use std::io::prelude::*;
 use std::fs::File;
 use std::io::SeekFrom;
@@ -18,7 +18,7 @@ pub struct Download {
     pub filename: String,
     pub memory: u64,
     pub threads: u64,
-    pub client: Arc<reqwest::Client>,
+    pub client: Arc<Client>,
 }
 
 impl Default for Download {
@@ -28,7 +28,7 @@ impl Default for Download {
             filename: "".to_string(),
             memory: 256,
             threads: 1,
-            client: Arc::new(reqwest::Client::new()),
+            client: Arc::new(Client::new()),
         }
     }
 }
@@ -54,7 +54,7 @@ impl Download {
 }
 
 fn download_parts(
-    client: Arc<reqwest::Client>,
+    client: Arc<Client>,
     url: String,
     filename: String,
     memory: u64,
@@ -96,7 +96,7 @@ fn download_parts(
 
                 let mut file_range_resp = client_ref
                     .get(&url_ref)
-                    .header(RANGE, range)
+                    .header(header::RANGE, range)
                     .send()
                     .unwrap();
 
