@@ -1,6 +1,10 @@
 # RLget 
 
-![License](https://img.shields.io/crates/l/cloak.svg)
+![License](https://img.shields.io/crates/l/cloak.svg) 
+[![Build Status](https://dev.azure.com/jake0725/rlget/_apis/build/status/rlget-CI?branchName=master)](https://dev.azure.com/jake0725/rlget/_build/latest?definitionId=4&branchName=master)
+
+[![Download Latest](https://img.shields.io/badge/dynamic/json.svg?label=download&url=https://api.github.com/repos/shockron22/rlget/releases/latest&query=$.assets[0].name)](https://github.com/shockron22/rlget/releases/latest)
+
 
 ## Rust Parallel Download client
   A download client that supports parallel downloading and custom memory settings.
@@ -18,7 +22,7 @@
   Then add ./target/release/rlget to your /usr/local/bin or other path.
 
 ## Usage
-  <img src="https://shockron22.github.io/rlget.svg">
+  <img src="https://shockron22.github.io/rlgetv0.0.1.svg">
 
 ## Speed test rlget VS wget
 
