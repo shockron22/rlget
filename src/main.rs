@@ -47,8 +47,7 @@ fn main() -> std::io::Result<()> {
         threads: threads,
         url: url,
         memory: memory,
-        filename: filename, 
-        ..Default::default() 
+        filename: filename,
     };
 
     download.get();

@@ -1,14 +1,11 @@
-extern crate reqwest;
+extern crate ureq;
 extern crate indicatif;
 
 use self::indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 
-use self::reqwest::header;
-use self::reqwest::Client;
 use std::io::prelude::*;
 use std::fs::File;
 use std::io::SeekFrom;
-use std::sync::Arc;
 use std::thread;
 
 static ONE_KB: u64 = 1024;
@@ -18,31 +15,17 @@ pub struct Download {
     pub filename: String,
     pub memory: u64,
     pub threads: u64,
-    pub client: Arc<Client>,
-}
-
-impl Default for Download {
-    fn default() -> Download {
-        Download {
-            url: "".to_string(),
-            filename: "".to_string(),
-            memory: 256,
-            threads: 1,
-            client: Arc::new(Client::new()),
-        }
-    }
 }
 
 impl Download {
     pub fn get(self) {
-        let content_length_resp = &self.client
-            .get(&self.url)
-            .send()
-            .expect("error in content-length request");
+        let mut request = ureq::get(&self.url);
+        let content_length_resp = request.call();
 
-        match content_length_resp.content_length() {
+        match content_length_resp.header("content-length") {
             Some(content_length) => {
-                let children = download_parts(self.client, self.url, self.filename, self.memory, self.threads, content_length);
+                let content_length_u64 = content_length.parse::<u64>().expect("could not parse content length");
+                let children = download_parts(self.filename, self.memory, self.threads, content_length_u64, request);
                 for child in children {
                     let _ = child.join();
                 }
@@ -54,12 +37,11 @@ impl Download {
 }
 
 fn download_parts(
-    client: Arc<Client>,
-    url: String,
     filename: String,
     memory: u64,
     threads: u64,
     content_length: u64,
+    request: ureq::Request,
 ) -> Vec<std::thread::JoinHandle<()>> {
     let mut range_start = 0;
     let mut children = vec![];
@@ -82,9 +64,8 @@ fn download_parts(
         pb.set_style(sty.clone());
         pb.set_message(&format!("thread #{}", x + 1));
 
-        let client_ref = client.clone();
+        let mut request_ref = request.clone();
         let filename_ref = filename.clone();
-        let url_ref = url.clone();
         children.push(
             thread::spawn(move || {
                 let max_buffer_size = ONE_KB * memory;
@@ -94,23 +75,25 @@ fn download_parts(
                 let mut file_handle = File::create(filename_ref).unwrap();
                 file_handle.seek(SeekFrom::Start(range_start)).unwrap();
 
-                let mut file_range_resp = client_ref
-                    .get(&url_ref)
-                    .header(header::RANGE, range)
-                    .send()
-                    .unwrap();
+                let file_range_resp = request_ref
+                    .set("Range", &range)
+                    .call();
+
+                let mut file_range_reader = file_range_resp.into_reader();
 
                 for _x in 0..buffer_chunks {
                     let mut vector_buffer = vec![0u8; max_buffer_size as usize];
-                    let file_range_ref = file_range_resp.by_ref();
-                    file_range_ref.read_exact(&mut vector_buffer).unwrap();
+                    file_range_reader.read_exact(&mut vector_buffer).unwrap();
                     file_handle.write(&vector_buffer).unwrap();
                     file_handle.flush().unwrap();
                     pb.inc(max_buffer_size);
                 }
 
                 if chunk_remainder != 0 {
-                    file_range_resp.copy_to(&mut file_handle).unwrap();
+                    let mut remainder_buffer = vec![0u8; max_buffer_size as usize];
+                    file_range_reader.read_to_end(&mut remainder_buffer).unwrap();
+                    file_handle.write(&remainder_buffer).unwrap();
+                    file_handle.flush().unwrap();
                     pb.set_position(chunk_remainder);
                     pb.finish_with_message("--done--");
                 }
