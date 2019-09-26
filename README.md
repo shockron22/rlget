@@ -18,7 +18,7 @@
   Then add ./target/release/rlget to your /usr/local/bin or other path.
 
 ## Usage
-  <img src="https://shockron22.github.io/rlget.svg">
+  <img src="https://shockron22.github.io/rlgetv0.0.1.svg">
 
 ## Speed test rlget VS wget
 
