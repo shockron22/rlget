@@ -1,8 +1,9 @@
-extern crate ureq;
+extern crate http_req;
 extern crate indicatif;
 
 use self::indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 
+use self::http_req::request;
 use std::io::prelude::*;
 use std::fs::File;
 use std::io::SeekFrom;
@@ -19,20 +20,16 @@ pub struct Download {
 
 impl Download {
     pub fn get(self) {
-        let mut request = ureq::get(&self.url);
-        let content_length_resp = request.call();
+        let mut writer = vec![0u8; 0];
+        let content_length_resp = request::get(&self.url, &mut writer).unwrap();
 
-        match content_length_resp.header("content-length") {
-            Some(content_length) => {
-                let content_length_u64 = content_length.parse::<u64>().expect("could not parse content length");
-                let children = download_parts(self.filename, self.memory, self.threads, content_length_u64, request);
-                for child in children {
-                    let _ = child.join();
-                }
-            }
-            None => (),
-        }
-
+        let content_length = content_length_resp.content_len().unwrap();
+        println!("CONTENT LENGTH : {}", content_length);
+        /* let content_length_u64 = content_length.parse::<u64>().expect("could not parse content length");
+        let children = download_parts(self.filename, self.memory, self.threads, content_length_u64, request);
+        for child in children {
+            let _ = child.join();
+        }*/
     }
 }
 
