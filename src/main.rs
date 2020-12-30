@@ -15,7 +15,7 @@ Usage:
 
 Options:
     -t THREADS, --threads=THREADS     Number of download threads. (default: 1)
-    -m MEMORY, --memory=MEMORY        The amount of memory for each thread to chunk request by (default: 256kb)
+    -m MEMORY, --memory=MEMORY        The amount of memory for each thread to chunk request by in KB (default: 256kb)
     -f FILENAME, --filename=FILENAME  The output file name (default: value at end of url after /)
     -h, --help                        Show this screen.
 ";
